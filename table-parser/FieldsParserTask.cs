@@ -52,21 +52,22 @@ namespace TableParser
                     continue;
                 }
 
-                Token token;
-                if (line[i] == '"' || line[i] == '\'')
-                {
-                    token = ReadQuotedField(line, i);
-                }
-                else
-                {
-                    token = ReadField(line, i);
-                }
-
+                var token = ReadToken(line, i);
                 tokens.Add(token);
                 i += token.Length - 1;
             }
 
             return tokens;
+        }
+
+        private static Token ReadToken(string line, int startIndex)
+        {
+            if (line[startIndex] == '"' || line[startIndex] == '\'')
+            {
+                return ReadQuotedField(line, startIndex);
+            }
+
+            return ReadField(line, startIndex);
         }
 
         private static Token ReadField(string line, int startIndex)
