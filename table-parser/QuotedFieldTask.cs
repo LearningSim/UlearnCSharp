@@ -29,6 +29,7 @@ namespace TableParser
 
         [TestCase(@"'a \''", 0, "a '", 6)] // [a \'] > [a ']
         [TestCase(@"'a \\'", 0, @"a \", 6)] // [a \\] > [a \]
+        [TestCase(@"'a \\\' a'", 0, @"a \' a", 9)] // [a \\\' a] > [a \' a]
         public void ParseToken_HasEscaping(string line, int startIndex, string expectedValue, int expectedLength) =>
             ParseToken_Success(line, startIndex, expectedValue, expectedLength);
 
@@ -56,10 +57,7 @@ namespace TableParser
                 }
                 else if (line[i] == '\\')
                 {
-                    if (!escaping)
-                    {
-                        escaping = true;
-                    }
+                    escaping = true;
                 }
                 else if (line[i] == quote)
                 {
