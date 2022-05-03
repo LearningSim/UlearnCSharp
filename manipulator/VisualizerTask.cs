@@ -74,24 +74,17 @@ namespace Manipulation
 		{
 			var joints = AnglesToCoordinatesTask.GetJointPositions(Shoulder, Elbow, Wrist);
 
-			graphics.DrawString($"X={X:0}, Y={Y:0}, Alpha={Alpha:0.00}", 
+			graphics.DrawString(
+                $"X={X:0}, Y={Y:0}, Alpha={Alpha:0.00}", 
                 new Font(SystemFonts.DefaultFont.FontFamily, 12), 
                 Brushes.DarkRed, 
                 10, 
                 10);
 			DrawReachableZone(graphics, ReachableAreaBrush, UnreachableAreaBrush, shoulderPos, joints);
 
-			var elbowPos = ConvertMathToWindow(joints[0], shoulderPos);
-			var wristPos = ConvertMathToWindow(joints[1], shoulderPos);
-			var palmEndPos = ConvertMathToWindow(joints[2], shoulderPos);
-			graphics.DrawLine(ManipulatorPen, shoulderPos.X, shoulderPos.Y, elbowPos.X, elbowPos.Y);
-			graphics.DrawLine(ManipulatorPen, elbowPos.X, elbowPos.Y, wristPos.X, wristPos.Y);
-			graphics.DrawLine(ManipulatorPen, wristPos.X, wristPos.Y, palmEndPos.X, palmEndPos.Y);
-
-			const float joint = 10f;
-			graphics.FillEllipse(JointBrush, shoulderPos.X - joint / 2, shoulderPos.Y - joint / 2, joint, joint);
-			graphics.FillEllipse(JointBrush, elbowPos.X - joint / 2, elbowPos.Y - joint / 2, joint, joint);
-			graphics.FillEllipse(JointBrush, wristPos.X - joint / 2, wristPos.Y - joint / 2, joint, joint);
+			// Нарисуйте сегменты манипулятора методом graphics.DrawLine используя ManipulatorPen.
+			// Нарисуйте суставы манипулятора окружностями методом graphics.FillEllipse используя JointBrush.
+			// Не забудьте сконвертировать координаты из логических в оконные
 		}
 
 		private static void DrawReachableZone(
