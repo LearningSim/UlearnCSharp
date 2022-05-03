@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace Manipulation
@@ -14,6 +13,9 @@ namespace Manipulation
 		public static double Elbow = 3 * Math.PI / 4;
 		public static double Shoulder = Math.PI / 2;
 
+		private static readonly double step = Math.PI / 180;
+		private static readonly double alphaStep = Math.PI / 180 / 120;
+
 		public static Brush UnreachableAreaBrush = new SolidBrush(Color.FromArgb(255, 255, 230, 230));
 		public static Brush ReachableAreaBrush = new SolidBrush(Color.FromArgb(255, 230, 255, 230));
 		public static Pen ManipulatorPen = new Pen(Color.Black, 3);
@@ -21,14 +23,31 @@ namespace Manipulation
 
 		public static void KeyDown(Form form, KeyEventArgs key)
 		{
-			// TODO: Добавьте реакцию на QAWS и пересчитывать Wrist
-			form.Invalidate(); // 
-		}
+			switch (key.KeyCode)
+			{
+				case Keys.Q:
+					Shoulder += step;
+					break;
+				case Keys.A:
+					Shoulder -= step;
+					break;
+				case Keys.W:
+					Elbow += step;
+					break;
+				case Keys.S:
+					Elbow -= step;
+					break;
+			}
 
+			Wrist = -Alpha - Shoulder - Elbow;
+			form.Invalidate();
+		}
 
 		public static void MouseMove(Form form, MouseEventArgs e)
 		{
-			// TODO: Измените X и Y пересчитав координаты (e.X, e.Y) в логические.
+			var mouse = ConvertWindowToMath(new PointF(e.X, e.Y), GetShoulderPos(form));
+			X = mouse.X;
+			Y = mouse.Y;
 
 			UpdateManipulator();
 			form.Invalidate();
@@ -36,7 +55,7 @@ namespace Manipulation
 
 		public static void MouseWheel(Form form, MouseEventArgs e)
 		{
-			// TODO: Измените Alpha, используя e.Delta — размер прокрутки колеса мыши
+			Alpha += e.Delta * alphaStep;
 
 			UpdateManipulator();
 			form.Invalidate();
@@ -44,25 +63,35 @@ namespace Manipulation
 
 		public static void UpdateManipulator()
 		{
-			// Вызовите ManipulatorTask.MoveManipulatorTo и обновите значения полей Shoulder, Elbow и Wrist, 
-            // если они не NaN. Это понадобится для последней задачи.
+			var angles = ManipulatorTask.MoveManipulatorTo(X, Y, Alpha);
+			if (double.IsNaN(angles[0])) return;
+			Shoulder = angles[0];
+			Elbow = angles[1];
+			Wrist = angles[2];
 		}
 
 		public static void DrawManipulator(Graphics graphics, PointF shoulderPos)
 		{
 			var joints = AnglesToCoordinatesTask.GetJointPositions(Shoulder, Elbow, Wrist);
 
-			graphics.DrawString(
-                $"X={X:0}, Y={Y:0}, Alpha={Alpha:0.00}", 
+			graphics.DrawString($"X={X:0}, Y={Y:0}, Alpha={Alpha:0.00}", 
                 new Font(SystemFonts.DefaultFont.FontFamily, 12), 
                 Brushes.DarkRed, 
                 10, 
                 10);
 			DrawReachableZone(graphics, ReachableAreaBrush, UnreachableAreaBrush, shoulderPos, joints);
 
-			// Нарисуйте сегменты манипулятора методом graphics.DrawLine используя ManipulatorPen.
-			// Нарисуйте суставы манипулятора окружностями методом graphics.FillEllipse используя JointBrush.
-			// Не забудьте сконвертировать координаты из логических в оконные
+			var elbowPos = ConvertMathToWindow(joints[0], shoulderPos);
+			var wristPos = ConvertMathToWindow(joints[1], shoulderPos);
+			var palmEndPos = ConvertMathToWindow(joints[2], shoulderPos);
+			graphics.DrawLine(ManipulatorPen, shoulderPos.X, shoulderPos.Y, elbowPos.X, elbowPos.Y);
+			graphics.DrawLine(ManipulatorPen, elbowPos.X, elbowPos.Y, wristPos.X, wristPos.Y);
+			graphics.DrawLine(ManipulatorPen, wristPos.X, wristPos.Y, palmEndPos.X, palmEndPos.Y);
+
+			const float joint = 10f;
+			graphics.FillEllipse(JointBrush, shoulderPos.X - joint / 2, shoulderPos.Y - joint / 2, joint, joint);
+			graphics.FillEllipse(JointBrush, elbowPos.X - joint / 2, elbowPos.Y - joint / 2, joint, joint);
+			graphics.FillEllipse(JointBrush, wristPos.X - joint / 2, wristPos.Y - joint / 2, joint, joint);
 		}
 
 		private static void DrawReachableZone(
@@ -94,6 +123,5 @@ namespace Manipulation
 		{
 			return new PointF(windowPoint.X - shoulderPos.X, shoulderPos.Y - windowPoint.Y);
 		}
-
 	}
 }
