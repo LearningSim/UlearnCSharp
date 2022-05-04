@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace rocket_bot
 {
     public class Channel<T> where T : class
     {
+        private List<T> items = new List<T>();
+
         /// <summary>
         /// Возвращает элемент по индексу или null, если такого элемента нет.
         /// При присвоении удаляет все элементы после.
@@ -15,10 +18,29 @@ namespace rocket_bot
         {
             get
             {
-                return null;
+                lock (items)
+                {
+                    return index < items.Count ? items[index] : null;
+                }
             }
             set
             {
+                lock (items)
+                {
+                    if (index < items.Count - 1)
+                    {
+                        items.RemoveRange(index + 1, items.Count - index - 1);
+                        items[index] = value;
+                    }
+                    else if (index == items.Count - 1)
+                    {
+                        items[index] = value;
+                    }
+                    else if (index == items.Count)
+                    {
+                        items.Add(value);
+                    }
+                }
             }
         }
 
@@ -27,7 +49,10 @@ namespace rocket_bot
         /// </summary>
         public T LastItem()
         {
-            return null;
+            lock (items)
+            {
+                return items.LastOrDefault();
+            }
         }
 
         /// <summary>
@@ -35,17 +60,18 @@ namespace rocket_bot
         /// </summary>
         public void AppendIfLastItemIsUnchanged(T item, T knownLastItem)
         {
+            lock (items)
+            {
+                if (knownLastItem == LastItem())
+                {
+                    items.Add(item);
+                }
+            }
         }
 
         /// <summary>
         /// Возвращает количество элементов в коллекции
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return 0;
-            }
-        }
+        public int Count => items.Count;
     }
 }
