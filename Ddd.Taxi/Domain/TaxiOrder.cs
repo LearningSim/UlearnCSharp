@@ -53,7 +53,6 @@ namespace Ddd.Taxi.Domain
 
     public class TaxiOrder : Entity<int>
     {
-        private readonly int id;
         private readonly DriversRepository driversRepo;
         private TaxiOrderStatus status;
         public PersonName ClientName { get; private set; }
@@ -68,7 +67,6 @@ namespace Ddd.Taxi.Domain
 
         private TaxiOrder(int id, DriversRepository driversRepo) : base(id)
         {
-            this.id = id;
             this.driversRepo = driversRepo;
         }
 
@@ -119,7 +117,7 @@ namespace Ddd.Taxi.Domain
         public string GetShortOrderInfo()
         {
             return string.Join(" ",
-                "OrderId: " + id,
+                "OrderId: " + Id,
                 "Status: " + status,
                 "Client: " + ClientName?.Format(),
                 "Driver: " + Driver?.Name.Format(),
@@ -180,13 +178,11 @@ namespace Ddd.Taxi.Domain
 
     public class Driver : Entity<int>
     {
-        public int Id { get; }
         public PersonName Name { get; }
         public Car Car { get; }
 
         public Driver(int id, PersonName name, Car car) : base(id)
         {
-            Id = id;
             Name = name;
             Car = car;
         }
