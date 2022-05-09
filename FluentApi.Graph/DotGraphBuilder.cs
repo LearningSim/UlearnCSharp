@@ -17,33 +17,33 @@ namespace FluentApi.Graph
         public static DotGraphBuilder UndirectedGraph(string graphName) =>
             new DotGraphBuilder(new Graph(graphName, false, true));
 
-        public NodeWithBuilder AddNode(string name) =>
-            new NodeWithBuilder(graph.AddNode(name), this);
+        public NodeBuilder AddNode(string name) =>
+            new NodeBuilder(graph.AddNode(name), this);
 
-        public EdgeWithBuilder AddEdge(string from, string to) =>
-            new EdgeWithBuilder(graph.AddEdge(from, to), this);
+        public EdgeBuilder AddEdge(string from, string to) =>
+            new EdgeBuilder(graph.AddEdge(from, to), this);
 
         public string Build() => graph.ToDotFormat();
     }
 
-    public abstract class BuilderContainer
+    public abstract class ItemBuilder
     {
         protected DotGraphBuilder Builder;
 
-        public NodeWithBuilder AddNode(string name) =>
+        public NodeBuilder AddNode(string name) =>
             Builder.AddNode(name);
 
-        public EdgeWithBuilder AddEdge(string from, string to) =>
+        public EdgeBuilder AddEdge(string from, string to) =>
             Builder.AddEdge(from, to);
 
         public string Build() => Builder.Build();
     }
 
-    public class NodeWithBuilder : BuilderContainer
+    public class NodeBuilder : ItemBuilder
     {
         private readonly GraphNode node;
 
-        public NodeWithBuilder(GraphNode node, DotGraphBuilder builder)
+        public NodeBuilder(GraphNode node, DotGraphBuilder builder)
         {
             this.node = node;
             Builder = builder;
@@ -56,11 +56,11 @@ namespace FluentApi.Graph
         }
     }
 
-    public class EdgeWithBuilder : BuilderContainer
+    public class EdgeBuilder : ItemBuilder
     {
         private readonly GraphEdge edge;
 
-        public EdgeWithBuilder(GraphEdge edge, DotGraphBuilder builder)
+        public EdgeBuilder(GraphEdge edge, DotGraphBuilder builder)
         {
             this.edge = edge;
             Builder = builder;
@@ -82,8 +82,8 @@ namespace FluentApi.Graph
         public NodeAttributes Color(string value) =>
             AddAttribute(MethodBase.GetCurrentMethod(), value);
 
-        public NodeAttributes Shape(string value) =>
-            AddAttribute(MethodBase.GetCurrentMethod(), value);
+        public NodeAttributes Shape(NodeShape value) =>
+            AddAttribute(MethodBase.GetCurrentMethod(), value.ToString().ToLower());
 
         public NodeAttributes FontSize(int value) =>
             AddAttribute(MethodBase.GetCurrentMethod(), value.ToString());
@@ -123,9 +123,9 @@ namespace FluentApi.Graph
         }
     }
 
-    public static class NodeShape
+    public enum NodeShape
     {
-        public const string Box = "box";
-        public const string Ellipse = "ellipse";
+        Box,
+        Ellipse
     }
 }
