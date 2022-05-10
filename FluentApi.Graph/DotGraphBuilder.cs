@@ -1,76 +1,65 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 
 namespace FluentApi.Graph
 {
-    public class DotGraphBuilder
+    public class DotGraphBuilder : INodeBuilder, IEdgeBuilder
     {
         private readonly Graph graph;
 
         private DotGraphBuilder(Graph graph) =>
             this.graph = graph;
 
-        public static DotGraphBuilder DirectedGraph(string graphName) =>
+        public static IDotGraphBuilder DirectedGraph(string graphName) =>
             new DotGraphBuilder(new Graph(graphName, true, true));
 
-        public static DotGraphBuilder UndirectedGraph(string graphName) =>
+        public static IDotGraphBuilder UndirectedGraph(string graphName) =>
             new DotGraphBuilder(new Graph(graphName, false, true));
 
-        public NodeBuilder AddNode(string name) =>
-            new NodeBuilder(graph.AddNode(name), this);
+        public INodeBuilder AddNode(string name)
+        {
+            graph.AddNode(name);
+            return this;
+        }
 
-        public EdgeBuilder AddEdge(string from, string to) =>
-            new EdgeBuilder(graph.AddEdge(from, to), this);
+        public IEdgeBuilder AddEdge(string from, string to)
+        {
+            graph.AddEdge(from, to);
+            return this;
+        }
 
         public string Build() => graph.ToDotFormat();
-    }
 
-    public abstract class ItemBuilder
-    {
-        protected DotGraphBuilder Builder;
-
-        public NodeBuilder AddNode(string name) =>
-            Builder.AddNode(name);
-
-        public EdgeBuilder AddEdge(string from, string to) =>
-            Builder.AddEdge(from, to);
-
-        public string Build() => Builder.Build();
-    }
-
-    public class NodeBuilder : ItemBuilder
-    {
-        private readonly GraphNode node;
-
-        public NodeBuilder(GraphNode node, DotGraphBuilder builder)
+        public IDotGraphBuilder With(Action<NodeAttributes> addAttributes)
         {
-            this.node = node;
-            Builder = builder;
+            addAttributes(new NodeAttributes(graph.Nodes.Last()));
+            return this;
         }
 
-        public DotGraphBuilder With(Action<NodeAttributes> addAttributes)
+        public IDotGraphBuilder With(Action<EdgeAttributes> addAttributes)
         {
-            addAttributes(new NodeAttributes(node));
-            return Builder;
+            addAttributes(new EdgeAttributes(graph.Edges.Last()));
+            return this;
         }
     }
 
-    public class EdgeBuilder : ItemBuilder
+    public interface IDotGraphBuilder
     {
-        private readonly GraphEdge edge;
+        INodeBuilder AddNode(string name);
+        IEdgeBuilder AddEdge(string from, string to);
+        string Build();
+    }
 
-        public EdgeBuilder(GraphEdge edge, DotGraphBuilder builder)
-        {
-            this.edge = edge;
-            Builder = builder;
-        }
+    public interface INodeBuilder : IDotGraphBuilder
+    {
+        IDotGraphBuilder With(Action<NodeAttributes> addAttributes);
+    }
 
-        public DotGraphBuilder With(Action<EdgeAttributes> addAttributes)
-        {
-            addAttributes(new EdgeAttributes(edge));
-            return Builder;
-        }
+    public interface IEdgeBuilder : IDotGraphBuilder
+    {
+        IDotGraphBuilder With(Action<EdgeAttributes> addAttributes);
     }
 
     public class NodeAttributes
