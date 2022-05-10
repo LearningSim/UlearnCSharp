@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -62,54 +63,46 @@ namespace FluentApi.Graph
         IDotGraphBuilder With(Action<EdgeAttributes> addAttributes);
     }
 
-    public class NodeAttributes
+    public abstract class CommonAttributes<T> where T : CommonAttributes<T>
     {
-        private readonly GraphNode node;
+        private readonly Dictionary<string, string> attributes;
 
-        public NodeAttributes(GraphNode node) => this.node = node;
+        protected CommonAttributes(Dictionary<string, string> attributes) => this.attributes = attributes;
 
-        public NodeAttributes Color(string value) =>
+        public T Color(string value) =>
             AddAttribute(MethodBase.GetCurrentMethod(), value);
 
-        public NodeAttributes Shape(NodeShape value) =>
-            AddAttribute(MethodBase.GetCurrentMethod(), value.ToString().ToLower());
-
-        public NodeAttributes FontSize(int value) =>
+        public T FontSize(int value) =>
             AddAttribute(MethodBase.GetCurrentMethod(), value.ToString());
 
-        public NodeAttributes Label(string value) =>
+        public T Label(string value) =>
             AddAttribute(MethodBase.GetCurrentMethod(), value);
 
-        private NodeAttributes AddAttribute(MethodBase method, string value)
+        protected T AddAttribute(MethodBase method, string value)
         {
-            node.Attributes.Add(method.Name.ToLower(), value);
-            return this;
+            attributes.Add(method.Name.ToLower(), value);
+            return (T)this;
         }
     }
 
-    public class EdgeAttributes
+    public class NodeAttributes : CommonAttributes<NodeAttributes>
     {
-        private readonly GraphEdge edge;
+        public NodeAttributes(GraphNode node) : base(node.Attributes)
+        {
+        }
 
-        public EdgeAttributes(GraphEdge edge) => this.edge = edge;
+        public NodeAttributes Shape(NodeShape value) =>
+            AddAttribute(MethodBase.GetCurrentMethod(), value.ToString().ToLower());
+    }
 
-        public EdgeAttributes Color(string value) =>
-            AddAttribute(MethodBase.GetCurrentMethod(), value);
-
-        public EdgeAttributes FontSize(int value) =>
-            AddAttribute(MethodBase.GetCurrentMethod(), value.ToString());
-
-        public EdgeAttributes Label(string value) =>
-            AddAttribute(MethodBase.GetCurrentMethod(), value);
+    public class EdgeAttributes : CommonAttributes<EdgeAttributes>
+    {
+        public EdgeAttributes(GraphEdge edge) : base(edge.Attributes)
+        {
+        }
 
         public EdgeAttributes Weight(double value) =>
             AddAttribute(MethodBase.GetCurrentMethod(), value.ToString(CultureInfo.InvariantCulture));
-
-        private EdgeAttributes AddAttribute(MethodBase method, string value)
-        {
-            edge.Attributes.Add(method.Name.ToLower(), value);
-            return this;
-        }
     }
 
     public enum NodeShape
