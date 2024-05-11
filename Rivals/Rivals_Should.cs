@@ -222,6 +222,34 @@ public class Rivals_Should : AbstractRivalsTest
 		AssertResult(expected, actual);
 	}
 	
+	[Test]
+	public void ReturnCorrectResult_OnEmptyDungeon_3x3_OnePlayer()
+	{
+		var textMap = new[]
+		{
+			"P  ",
+			"   ",
+			"C  "
+		};
+		var expectedOwnersMap = new[]
+		{
+			"000",
+			"000",
+			"000"
+		};
+		var expectedDistancesMap = new[]
+		{
+			"012",
+			"123",
+			"234"
+		};
+		var expected = ParseMaps(expectedOwnersMap, expectedDistancesMap);
+
+		var actual = RivalsTask.AssignOwners(Map.FromLines(textMap));
+
+		AssertResult(expected, actual);
+	}
+	
 	
 
 	[Test]
