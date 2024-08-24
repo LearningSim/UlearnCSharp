@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathSearch", "PathSearch\PathSearch.csproj", "{4BF4D627-F553-4309-8348-CD31B0AA96DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphPractice", "GraphPractice\GraphPractice.csproj", "{7C280E37-B4FC-4763-BB63-3F866C9212BC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4BF4D627-F553-4309-8348-CD31B0AA96DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BF4D627-F553-4309-8348-CD31B0AA96DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BF4D627-F553-4309-8348-CD31B0AA96DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BF4D627-F553-4309-8348-CD31B0AA96DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C280E37-B4FC-4763-BB63-3F866C9212BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C280E37-B4FC-4763-BB63-3F866C9212BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C280E37-B4FC-4763-BB63-3F866C9212BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C280E37-B4FC-4763-BB63-3F866C9212BC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
