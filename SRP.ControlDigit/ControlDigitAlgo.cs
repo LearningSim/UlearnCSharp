@@ -7,7 +7,7 @@ namespace SRP.ControlDigit
     {
         // Вспомогательные методы-расширения поместите в этот класс.
         // Они должны быть понятны и потенциально полезны вне контекста задачи расчета контрольных разрядов.
-        public static IEnumerable<(T value, int index)> Enumerate<T>(this IEnumerable<T> source) =>
+        public static IEnumerable<(T Value, int Index)> Enumerate<T>(this IEnumerable<T> source) =>
             source.Select((value, i) => (value, i));
 
         public static IEnumerable<int> SplitReversed(this long number)
@@ -39,34 +39,21 @@ namespace SRP.ControlDigit
 
         public static int Isbn10(long number)
         {
-            var sum = 0;
-            foreach (var (digit, i) in number.SplitReversed().Enumerate())
-            {
-                var numberPosition = i + 2;
-                sum += digit * numberPosition;
-            }
-
+            var sum = number.SplitReversed().Enumerate()
+                .Sum(digit => digit.Value * (digit.Index + 2));
             var result = sum.GetComplementToMultiple(11);
             return result == 10 ? 'X' : result.ToChar();
         }
 
-        public static int Luhn(long number)
-        {
-            var sum = number.SplitReversed()
-                .Select(CalculateLuhnAddend)
-                .Sum();
-
-            return sum.GetComplementToMultiple(10);
-        }
+        public static int Luhn(long number) => number
+            .SplitReversed()
+            .Select(CalculateLuhnAddend)
+            .Sum()
+            .GetComplementToMultiple(10);
 
         private static int CalculateLuhnAddend(int digit, int digitIndex)
         {
-            var addend = digit;
-            if (digitIndex % 2 == 0)
-            {
-                addend *= 2;
-            }
-
+            var addend = digitIndex % 2 == 0 ? digit * 2 : digit;
             return addend.SumDigits();
         }
     }
