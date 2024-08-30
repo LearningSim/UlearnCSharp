@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace FluentApi.Graph
 {
@@ -69,40 +69,31 @@ namespace FluentApi.Graph
 
         protected CommonAttributes(Dictionary<string, string> attributes) => this.attributes = attributes;
 
-        public T Color(string value) =>
-            AddAttribute(MethodBase.GetCurrentMethod(), value);
+        public T Color(string value) => AddAttribute(value);
+        public T FontSize(int value) => AddAttribute(value.ToString());
+        public T Label(string value) => AddAttribute(value);
 
-        public T FontSize(int value) =>
-            AddAttribute(MethodBase.GetCurrentMethod(), value.ToString());
-
-        public T Label(string value) =>
-            AddAttribute(MethodBase.GetCurrentMethod(), value);
-
-        protected T AddAttribute(MethodBase method, string value)
+        protected T AddAttribute(string value, [CallerMemberName] string callerName = "")
         {
-            attributes.Add(method.Name.ToLower(), value);
+            attributes.Add(callerName.ToLower(), value);
             return (T)this;
         }
     }
 
     public class NodeAttributes : CommonAttributes<NodeAttributes>
     {
-        public NodeAttributes(GraphNode node) : base(node.Attributes)
-        {
-        }
+        public NodeAttributes(GraphNode node) : base(node.Attributes) { }
 
         public NodeAttributes Shape(NodeShape value) =>
-            AddAttribute(MethodBase.GetCurrentMethod(), value.ToString().ToLower());
+            AddAttribute(value.ToString().ToLower());
     }
 
     public class EdgeAttributes : CommonAttributes<EdgeAttributes>
     {
-        public EdgeAttributes(GraphEdge edge) : base(edge.Attributes)
-        {
-        }
+        public EdgeAttributes(GraphEdge edge) : base(edge.Attributes) { }
 
         public EdgeAttributes Weight(double value) =>
-            AddAttribute(MethodBase.GetCurrentMethod(), value.ToString(CultureInfo.InvariantCulture));
+            AddAttribute(value.ToString(CultureInfo.InvariantCulture));
     }
 
     public enum NodeShape
