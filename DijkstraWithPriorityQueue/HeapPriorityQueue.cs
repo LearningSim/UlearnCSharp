@@ -4,6 +4,7 @@ public class HeapPriorityQueue<TValue> : IPriorityQueue<TValue> where TValue : n
 {
     private readonly Dictionary<TValue, int> indexByVal = new();
     private readonly List<(TValue Value, double Priority)> items = [];
+    private int Length => items.Count;
 
     public (bool Success, double Priority) Peek(TValue value)
     {
@@ -13,22 +14,22 @@ public class HeapPriorityQueue<TValue> : IPriorityQueue<TValue> where TValue : n
 
     public void Add(TValue value, double priority)
     {
-        indexByVal[value] = items.Count;
+        indexByVal[value] = Length;
         items.Add((value, priority));
-        HeapifyUp(items.Count - 1);
+        HeapifyUp(Length - 1);
     }
 
     public void Remove(TValue value)
     {
-        if (items.Count == 0) return;
+        if (Length == 0) return;
 
         var index = indexByVal[value];
         indexByVal[items[^1].Value] = index;
         indexByVal.Remove(value);
 
         items[index] = items[^1];
-        items.RemoveAt(items.Count - 1);
-        if (items.Count == 0) return;
+        items.RemoveAt(Length - 1);
+        if (Length == 0) return;
 
         HeapifyDown(index);
     }
@@ -50,7 +51,7 @@ public class HeapPriorityQueue<TValue> : IPriorityQueue<TValue> where TValue : n
 
     public (TValue Value, double Priority)? PopMin()
     {
-        if (items.Count == 0) return null;
+        if (Length == 0) return null;
         var min = items[0];
         Remove(items[0].Value);
         return min;
@@ -71,9 +72,9 @@ public class HeapPriorityQueue<TValue> : IPriorityQueue<TValue> where TValue : n
         while (true)
         {
             var minChildIndex = LeftChildIndex(itemIndex);
-            if (minChildIndex >= items.Count) return;
+            if (minChildIndex >= Length) return;
 
-            if (RightChildIndex(itemIndex) < items.Count &&
+            if (RightChildIndex(itemIndex) < Length &&
                 RightChild(itemIndex).Priority < LeftChild(itemIndex).Priority)
             {
                 minChildIndex = RightChildIndex(itemIndex);
